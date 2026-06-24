@@ -7,12 +7,12 @@ use core::marker::PhantomData;
 use base64ct::{Base64UrlUnpadded, Encoding};
 
 use super::{Error, Update};
-use crate::Zeroizing;
+use crate::maybe_zeroize::MaybeZeroizing;
 
 /// A base64 streaming decoder.
 pub struct Decoder<T, E = Base64UrlUnpadded> {
-    decoded: Zeroizing<[u8; 3]>,
-    encoded: Zeroizing<[u8; 4]>,
+    decoded: MaybeZeroizing<[u8; 3]>,
+    encoded: MaybeZeroizing<[u8; 4]>,
     config: PhantomData<E>,
     used: usize,
     all: usize,

@@ -9,10 +9,13 @@ use core::fmt::{Debug, Formatter};
 use core::marker::PhantomData;
 use core::ops::{Deref, DerefMut};
 use core::str::FromStr;
+#[cfg(feature = "secret")]
+use zeroize::Zeroize;
 
 use base64ct::{Base64UrlUnpadded, Encoding};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error as _};
 
+use crate::maybe_zeroize::MaybeZeroizing;
 use crate::stream::Error;
 
 /// A serde wrapper for base64-encoded bytes.
@@ -22,7 +25,8 @@ pub struct Bytes<T = Box<[u8]>, E = Base64UrlUnpadded> {
     cfg: PhantomData<E>,
 }
 
-impl<T: crate::Zeroize, E> crate::Zeroize for Bytes<T, E> {
+#[cfg(feature = "secret")]
+impl<T: Zeroize, E> Zeroize for Bytes<T, E> {
     fn zeroize(&mut self) {
         self.buf.zeroize()
     }
@@ -114,14 +118,14 @@ impl<E: Encoding> FromStr for Bytes<Box<[u8]>, E> {
 
 impl<T: AsRef<[u8]>, E: Encoding> Serialize for Bytes<T, E> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let b64 = crate::Zeroizing::from(E::encode_string(self.buf.as_ref()));
+        let b64 = MaybeZeroizing::from(E::encode_string(self.buf.as_ref()));
         b64.serialize(serializer)
     }
 }
 
 impl<'de, E: Encoding> Deserialize<'de> for Bytes<Vec<u8>, E> {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let enc = crate::Zeroizing::from(String::deserialize(deserializer)?);
+        let enc = MaybeZeroizing::from(String::deserialize(deserializer)?);
         let dec = E::decode_vec(&enc).map_err(|_| D::Error::custom("invalid base64"))?;
 
         Ok(Self {

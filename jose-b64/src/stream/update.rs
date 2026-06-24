@@ -6,6 +6,8 @@ use alloc::vec::Vec;
 
 use core::convert::Infallible;
 
+use crate::maybe_zeroize::{MaybeZeroize, MaybeZeroizing};
+
 /// A type that can be updated with bytes.
 ///
 /// This type is similar to `std::io::Write` or `digest::Update`.
@@ -56,7 +58,7 @@ impl<T: Update> Update for Vec<T> {
     }
 }
 
-impl<T: crate::Zeroize + Update> Update for crate::Zeroizing<T> {
+impl<T: MaybeZeroize + Update> Update for MaybeZeroizing<T> {
     type Error = T::Error;
 
     fn update(&mut self, chunk: impl AsRef<[u8]>) -> Result<(), Self::Error> {

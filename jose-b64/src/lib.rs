@@ -24,12 +24,6 @@ extern crate alloc;
 pub mod serde;
 pub mod stream;
 
-mod zero;
-
 pub use base64ct;
 
-#[cfg(feature = "secret")]
-use zeroize::{Zeroize, Zeroizing};
-
-#[cfg(not(feature = "secret"))]
-use zero::{Zeroize, Zeroizing};
+mod maybe_zeroize;

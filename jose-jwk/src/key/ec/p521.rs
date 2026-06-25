@@ -1,48 +1,47 @@
 // SPDX-FileCopyrightText: 2022 Profian Inc. <opensource@profian.com>
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![cfg(feature = "k256")]
+#![cfg(feature = "p521")]
 
-use k256::elliptic_curve::sec1::{FromEncodedPoint, ToEncodedPoint};
-use k256::{EncodedPoint, FieldBytes, PublicKey, SecretKey};
+use p521::elliptic_curve::sec1::{FromSec1Point, ToSec1Point};
+use p521::{FieldBytes, PublicKey, Sec1Point, SecretKey};
 
 use jose_jwa::{Algorithm, Algorithm::Signing, Signing::*};
 
-use super::Error;
-use super::KeyInfo;
+use crate::crypto::{Error, KeyInfo};
 use crate::{Ec, EcCurves};
 
 #[cfg(feature = "legacy")]
-impl crate::legacy::JwkParameters for k256::Secp256k1 {
-    const CRV: &'static str = "secp256k1";
+impl crate::legacy::JwkParameters for p521::NistP521 {
+    const CRV: &'static str = "P-521";
 }
 
 impl KeyInfo for PublicKey {
     fn strength(&self) -> usize {
-        16
+        32
     }
 
     fn is_supported(&self, algo: &Algorithm) -> bool {
-        matches!(algo, Signing(Es256K))
+        matches!(algo, Signing(Es512))
     }
 }
 
 impl KeyInfo for SecretKey {
     fn strength(&self) -> usize {
-        16
+        32
     }
 
     fn is_supported(&self, algo: &Algorithm) -> bool {
-        matches!(algo, Signing(Es256K))
+        matches!(algo, Signing(Es512))
     }
 }
 
 impl From<&PublicKey> for Ec {
     fn from(pk: &PublicKey) -> Self {
-        let ep = pk.to_encoded_point(false);
+        let ep = pk.to_sec1_point(false);
 
         Self {
-            crv: EcCurves::P256K,
+            crv: EcCurves::P521,
             x: ep.x().expect("unreachable").to_vec().into(),
             y: ep.y().expect("unreachable").to_vec().into(),
             d: None,
@@ -60,7 +59,7 @@ impl TryFrom<&Ec> for PublicKey {
     type Error = Error;
 
     fn try_from(value: &Ec) -> Result<Self, Self::Error> {
-        if value.crv != EcCurves::P256K {
+        if value.crv != EcCurves::P521 {
             return Err(Error::AlgMismatch);
         }
 
@@ -77,8 +76,8 @@ impl TryFrom<&Ec> for PublicKey {
         x.copy_from_slice(&value.x);
         y.copy_from_slice(&value.y);
 
-        let ep = EncodedPoint::from_affine_coordinates(&x, &y, false);
-        Option::from(Self::from_encoded_point(&ep)).ok_or(Error::Invalid)
+        let ep = Sec1Point::from_affine_coordinates(&x, &y, false);
+        Option::from(Self::from_sec1_point(&ep)).ok_or(Error::Invalid)
     }
 }
 
@@ -108,7 +107,7 @@ impl TryFrom<&Ec> for SecretKey {
     type Error = Error;
 
     fn try_from(value: &Ec) -> Result<Self, Self::Error> {
-        if value.crv != EcCurves::P256K {
+        if value.crv != EcCurves::P521 {
             return Err(Error::AlgMismatch);
         }
 

@@ -18,6 +18,8 @@ edition = "2024"
 rust-version = "1.85"
 
 [dependencies]
+jose-b64 = { version = "=0.2.0-pre", default-features = false, features = ["secret"] }
+
 serde = { version = "1.0.185", default-features = false, features = ["alloc", "derive"] }
 
 [dev-dependencies]

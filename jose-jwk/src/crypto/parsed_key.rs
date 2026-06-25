@@ -19,7 +19,7 @@ use super::KeyInfo;
 /// behavior of a JWK, this structure allows us to represent the different
 /// kinds of JWKs at runtime using a single object.
 #[allow(clippy::large_enum_variant)]
-pub enum Key {
+pub enum ParsedKey {
     /// A symmetric key.
     Oct(Zeroizing<Box<[u8]>>),
 
@@ -44,7 +44,7 @@ pub enum Key {
     P256K(super::Kind<k256::PublicKey, k256::SecretKey>),
 }
 
-impl KeyInfo for Key {
+impl KeyInfo for ParsedKey {
     fn strength(&self) -> usize {
         match self {
             Self::Oct(k) => k.strength(),
@@ -83,109 +83,109 @@ impl KeyInfo for Key {
             Self::P521(k) => k.is_supported(algo),
 
             #[cfg(feature = "k256")]
-            Key::P256K(k) => k.is_supported(algo),
+            ParsedKey::P256K(k) => k.is_supported(algo),
         }
     }
 }
 
-impl From<Zeroizing<Box<[u8]>>> for Key {
+impl From<Zeroizing<Box<[u8]>>> for ParsedKey {
     fn from(value: Zeroizing<Box<[u8]>>) -> Self {
         Self::Oct(value)
     }
 }
 
 #[cfg(feature = "rsa")]
-impl From<super::Kind<rsa::RsaPublicKey, rsa::RsaPrivateKey>> for Key {
+impl From<super::Kind<rsa::RsaPublicKey, rsa::RsaPrivateKey>> for ParsedKey {
     fn from(value: super::Kind<rsa::RsaPublicKey, rsa::RsaPrivateKey>) -> Self {
         Self::Rsa(value)
     }
 }
 
 #[cfg(feature = "rsa")]
-impl From<rsa::RsaPublicKey> for Key {
+impl From<rsa::RsaPublicKey> for ParsedKey {
     fn from(value: rsa::RsaPublicKey) -> Self {
         Self::Rsa(super::Kind::Public(value))
     }
 }
 
 #[cfg(feature = "rsa")]
-impl From<rsa::RsaPrivateKey> for Key {
+impl From<rsa::RsaPrivateKey> for ParsedKey {
     fn from(value: rsa::RsaPrivateKey) -> Self {
         Self::Rsa(super::Kind::Secret(value))
     }
 }
 
 #[cfg(feature = "p256")]
-impl From<super::Kind<p256::PublicKey, p256::SecretKey>> for Key {
+impl From<super::Kind<p256::PublicKey, p256::SecretKey>> for ParsedKey {
     fn from(value: super::Kind<p256::PublicKey, p256::SecretKey>) -> Self {
         Self::P256(value)
     }
 }
 
 #[cfg(feature = "p256")]
-impl From<p256::PublicKey> for Key {
+impl From<p256::PublicKey> for ParsedKey {
     fn from(value: p256::PublicKey) -> Self {
         Self::P256(super::Kind::Public(value))
     }
 }
 
 #[cfg(feature = "p256")]
-impl From<p256::SecretKey> for Key {
+impl From<p256::SecretKey> for ParsedKey {
     fn from(value: p256::SecretKey) -> Self {
         Self::P256(super::Kind::Secret(value))
     }
 }
 
 #[cfg(feature = "p384")]
-impl From<super::Kind<p384::PublicKey, p384::SecretKey>> for Key {
+impl From<super::Kind<p384::PublicKey, p384::SecretKey>> for ParsedKey {
     fn from(value: super::Kind<p384::PublicKey, p384::SecretKey>) -> Self {
         Self::P384(value)
     }
 }
 
 #[cfg(feature = "p384")]
-impl From<p384::PublicKey> for Key {
+impl From<p384::PublicKey> for ParsedKey {
     fn from(value: p384::PublicKey) -> Self {
         Self::P384(super::Kind::Public(value))
     }
 }
 
 #[cfg(feature = "p384")]
-impl From<p384::SecretKey> for Key {
+impl From<p384::SecretKey> for ParsedKey {
     fn from(value: p384::SecretKey) -> Self {
         Self::P384(super::Kind::Secret(value))
     }
 }
 
 #[cfg(feature = "p521")]
-impl From<super::Kind<p521::PublicKey, p521::SecretKey>> for Key {
+impl From<super::Kind<p521::PublicKey, p521::SecretKey>> for ParsedKey {
     fn from(value: super::Kind<p521::PublicKey, p521::SecretKey>) -> Self {
         Self::P521(value)
     }
 }
 
 #[cfg(feature = "p521")]
-impl From<p521::PublicKey> for Key {
+impl From<p521::PublicKey> for ParsedKey {
     fn from(value: p521::PublicKey) -> Self {
         Self::P521(super::Kind::Public(value))
     }
 }
 
 #[cfg(feature = "p521")]
-impl From<p521::SecretKey> for Key {
+impl From<p521::SecretKey> for ParsedKey {
     fn from(value: p521::SecretKey) -> Self {
         Self::P521(super::Kind::Secret(value))
     }
 }
 
-impl From<&crate::Oct> for Key {
+impl From<&crate::Oct> for ParsedKey {
     fn from(value: &crate::Oct) -> Self {
         Self::Oct(value.k.to_vec().into_boxed_slice().into())
     }
 }
 
 #[cfg(feature = "rsa")]
-impl TryFrom<&crate::Rsa> for Key {
+impl TryFrom<&crate::Rsa> for ParsedKey {
     type Error = super::Error;
 
     fn try_from(value: &crate::Rsa) -> Result<Self, Self::Error> {
@@ -194,7 +194,7 @@ impl TryFrom<&crate::Rsa> for Key {
 }
 
 #[cfg(any(feature = "p256", feature = "p384", feature = "p521"))]
-impl TryFrom<&crate::Ec> for Key {
+impl TryFrom<&crate::Ec> for ParsedKey {
     type Error = super::Error;
 
     fn try_from(value: &crate::Ec) -> Result<Self, Self::Error> {
@@ -213,7 +213,7 @@ impl TryFrom<&crate::Ec> for Key {
     }
 }
 
-impl TryFrom<&crate::Key> for Key {
+impl TryFrom<&crate::Key> for ParsedKey {
     type Error = super::Error;
 
     fn try_from(value: &crate::Key) -> Result<Self, Self::Error> {
@@ -231,39 +231,39 @@ impl TryFrom<&crate::Key> for Key {
     }
 }
 
-impl From<&Key> for crate::Key {
-    fn from(value: &Key) -> Self {
+impl From<&ParsedKey> for crate::Key {
+    fn from(value: &ParsedKey) -> Self {
         match value {
-            Key::Oct(oct) => Self::Oct(crate::Oct {
+            ParsedKey::Oct(oct) => Self::Oct(crate::Oct {
                 k: oct.to_vec().into(),
             }),
 
             #[cfg(feature = "rsa")]
-            Key::Rsa(kind) => match kind {
+            ParsedKey::Rsa(kind) => match kind {
                 super::Kind::Public(public) => Self::Rsa(public.into()),
                 super::Kind::Secret(secret) => Self::Rsa(secret.into()),
             },
 
             #[cfg(feature = "p256")]
-            Key::P256(kind) => match kind {
+            ParsedKey::P256(kind) => match kind {
                 super::Kind::Public(public) => Self::Ec(public.into()),
                 super::Kind::Secret(secret) => Self::Ec(secret.into()),
             },
 
             #[cfg(feature = "p384")]
-            Key::P384(kind) => match kind {
+            ParsedKey::P384(kind) => match kind {
                 super::Kind::Public(public) => Self::Ec(public.into()),
                 super::Kind::Secret(secret) => Self::Ec(secret.into()),
             },
 
             #[cfg(feature = "p521")]
-            Key::P521(kind) => match kind {
+            ParsedKey::P521(kind) => match kind {
                 super::Kind::Public(public) => Self::Ec(public.into()),
                 super::Kind::Secret(secret) => Self::Ec(secret.into()),
             },
 
             #[cfg(feature = "k256")]
-            Key::P256K(kind) => match kind {
+            ParsedKey::P256K(kind) => match kind {
                 super::Kind::Public(public) => Self::Ec(public.into()),
                 super::Kind::Secret(secret) => Self::Ec(secret.into()),
             },

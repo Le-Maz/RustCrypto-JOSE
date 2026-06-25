@@ -214,52 +214,6 @@ impl fmt::Display for ContentEncryption {
     }
 }
 
-/// Cryptographic Algorithms for Keys (Key Types), as defined in [RFC7518] section 6.1.
-///
-/// [RFC7518]: https://www.rfc-editor.org/rfc/rfc7518
-#[non_exhaustive]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum KeyType {
-    /// Elliptic Curve
-    #[serde(rename = "EC")]
-    Ec,
-    /// RSA
-    #[serde(rename = "RSA")]
-    Rsa,
-    /// Octet sequence (used to represent symmetric keys)
-    #[serde(rename = "oct")]
-    Oct,
-}
-
-impl fmt::Display for KeyType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.serialize(f)
-    }
-}
-
-/// Elliptic Curve names, as defined in [RFC7518] section 6.2.1.1.
-///
-/// [RFC7518]: https://www.rfc-editor.org/rfc/rfc7518
-#[non_exhaustive]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EllipticCurve {
-    /// P-256 Curve
-    #[serde(rename = "P-256")]
-    P256,
-    /// P-384 Curve
-    #[serde(rename = "P-384")]
-    P384,
-    /// P-521 Curve
-    #[serde(rename = "P-521")]
-    P521,
-}
-
-impl fmt::Display for EllipticCurve {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.serialize(f)
-    }
-}
-
 /// JSON Web Encryption Compression Algorithms, as defined in [RFC7518] section 7.3.
 ///
 /// [RFC7518]: https://www.rfc-editor.org/rfc/rfc7518
@@ -364,36 +318,6 @@ mod tests {
 
         assert_eq!(
             serde_json::from_str::<Vec<ContentEncryption>>(&ser).expect("deserialization failed"),
-            input
-        );
-    }
-
-    #[test]
-    fn key_type_roundtrip() {
-        use KeyType::*;
-
-        let input = vec![Ec, Rsa, Oct];
-        let ser = serde_json::to_string(&input).expect("serialization failed");
-
-        assert_eq!(ser, r#"["EC","RSA","oct"]"#);
-
-        assert_eq!(
-            serde_json::from_str::<Vec<KeyType>>(&ser).expect("deserialization failed"),
-            input
-        );
-    }
-
-    #[test]
-    fn elliptic_curve_roundtrip() {
-        use EllipticCurve::*;
-
-        let input = vec![P256, P384, P521];
-        let ser = serde_json::to_string(&input).expect("serialization failed");
-
-        assert_eq!(ser, r#"["P-256","P-384","P-521"]"#);
-
-        assert_eq!(
-            serde_json::from_str::<Vec<EllipticCurve>>(&ser).expect("deserialization failed"),
             input
         );
     }

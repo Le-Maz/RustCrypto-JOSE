@@ -20,8 +20,9 @@ jose-jwk = { path = "./jose-jwk" }
 jose-jws = { path = "./jose-jws" }
 jose-jwt = { path = "./jose-jwt" }
 
-primefield = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
-k256       = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
-p256       = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
-p384       = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
-p521       = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+elliptic-curve = { git = "https://github.com/RustCrypto/traits.git"}
+primefield     = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+k256           = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+p256           = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+p384           = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+p521           = { git = "https://github.com/RustCrypto/elliptic-curves.git" }

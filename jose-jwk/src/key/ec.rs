@@ -3,6 +3,11 @@
 
 //! JWK elliptic-curve key material.
 
+mod k256;
+mod p256;
+mod p384;
+mod p521;
+
 use serde::{Deserialize, Serialize};
 
 use jose_b64::serde::{Bytes, Secret};

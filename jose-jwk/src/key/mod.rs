@@ -5,15 +5,15 @@
 
 use serde::{Deserialize, Serialize};
 
-mod ec;
-mod oct;
-mod okp;
-mod rsa;
+mod ec_key;
+mod oct_key;
+mod okp_key;
+mod rsa_key;
 
-pub use self::ec::{Ec, EcCurves};
-pub use self::oct::Oct;
-pub use self::okp::{Okp, OkpCurves};
-pub use self::rsa::{Rsa, RsaOptional, RsaOtherPrimes, RsaPrivate};
+pub use self::ec_key::{EcCurves, EcKey};
+pub use self::oct_key::OctKey;
+pub use self::okp_key::{OkpCurves, OkpKey};
+pub use self::rsa_key::{RsaKey, RsaOptional, RsaOtherPrimes, RsaPrivate};
 
 /// A key type that can be contained in a JWK.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -21,43 +21,43 @@ pub use self::rsa::{Rsa, RsaOptional, RsaOtherPrimes, RsaPrivate};
 #[non_exhaustive]
 pub enum Key {
     /// An elliptic-curve key.
-    Ec(Ec),
+    Ec(EcKey),
 
     /// An RSA key.
-    Rsa(Rsa),
+    Rsa(RsaKey),
 
     /// A symmetric key.
     #[serde(rename = "oct")]
-    Oct(Oct),
+    Oct(OctKey),
 
     /// A CFRG-curve key.
-    Okp(Okp),
+    Okp(OkpKey),
 }
 
-impl From<Ec> for Key {
+impl From<EcKey> for Key {
     #[inline(always)]
-    fn from(key: Ec) -> Self {
+    fn from(key: EcKey) -> Self {
         Self::Ec(key)
     }
 }
 
-impl From<Rsa> for Key {
+impl From<RsaKey> for Key {
     #[inline(always)]
-    fn from(key: Rsa) -> Self {
+    fn from(key: RsaKey) -> Self {
         Self::Rsa(key)
     }
 }
 
-impl From<Oct> for Key {
+impl From<OctKey> for Key {
     #[inline(always)]
-    fn from(key: Oct) -> Self {
+    fn from(key: OctKey) -> Self {
         Self::Oct(key)
     }
 }
 
-impl From<Okp> for Key {
+impl From<OkpKey> for Key {
     #[inline(always)]
-    fn from(key: Okp) -> Self {
+    fn from(key: OkpKey) -> Self {
         Self::Okp(key)
     }
 }

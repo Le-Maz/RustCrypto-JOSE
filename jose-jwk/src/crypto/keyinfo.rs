@@ -6,7 +6,7 @@ use core::ops::Deref;
 use alloc::{boxed::Box, vec::Vec};
 use jose_jwa::{Algorithm, Algorithm::Signing, Signing::*};
 
-use crate::{Ec, EcCurves, Jwk, Key, Oct, Okp, OkpCurves, Rsa};
+use crate::{EcCurves, EcKey, Jwk, Key, OctKey, OkpCurves, OkpKey, RsaKey};
 
 /// Information about a cryptographic key.
 pub trait KeyInfo {
@@ -107,7 +107,7 @@ impl KeyInfo for Key {
     }
 }
 
-impl KeyInfo for Ec {
+impl KeyInfo for EcKey {
     fn strength(&self) -> usize {
         match self.crv {
             EcCurves::P256 => 16,
@@ -129,7 +129,7 @@ impl KeyInfo for Ec {
     }
 }
 
-impl KeyInfo for Oct {
+impl KeyInfo for OctKey {
     fn strength(&self) -> usize {
         self.k.len()
     }
@@ -145,7 +145,7 @@ impl KeyInfo for Oct {
     }
 }
 
-impl KeyInfo for Okp {
+impl KeyInfo for OkpKey {
     fn strength(&self) -> usize {
         match self.crv {
             OkpCurves::Ed25519 => 16,
@@ -160,7 +160,7 @@ impl KeyInfo for Okp {
     }
 }
 
-impl KeyInfo for Rsa {
+impl KeyInfo for RsaKey {
     fn strength(&self) -> usize {
         self.n.len() / 16
     }

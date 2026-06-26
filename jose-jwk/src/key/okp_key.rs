@@ -11,7 +11,7 @@ use jose_b64::serde::{Bytes, Secret};
 ///
 /// [RFC 8037]: https://www.rfc-editor.org/rfc/rfc8037
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Okp {
+pub struct OkpKey {
     /// The CFRG curve.
     pub crv: OkpCurves,
 

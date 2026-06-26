@@ -11,7 +11,7 @@ use jose_b64::serde::{Bytes, Secret};
 
 /// An RSA key.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Rsa {
+pub struct RsaKey {
     /// The RSA modulus.
     pub n: Bytes,
 

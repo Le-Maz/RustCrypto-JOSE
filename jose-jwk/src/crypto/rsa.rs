@@ -12,7 +12,7 @@ use jose_jwa::{Algorithm, Algorithm::Signing, Signing::*};
 
 use super::Error;
 use super::KeyInfo;
-use crate::{Rsa, RsaOptional, RsaPrivate};
+use crate::{RsaKey, RsaOptional, RsaPrivate};
 
 impl KeyInfo for RsaPublicKey {
     fn strength(&self) -> usize {
@@ -61,7 +61,7 @@ impl KeyInfo for RsaPrivateKey {
     }
 }
 
-impl From<&RsaPublicKey> for Rsa {
+impl From<&RsaPublicKey> for RsaKey {
     fn from(pk: &RsaPublicKey) -> Self {
         Self {
             n: pk.n().to_be_bytes_trimmed_vartime().into(),
@@ -71,31 +71,31 @@ impl From<&RsaPublicKey> for Rsa {
     }
 }
 
-impl From<RsaPublicKey> for Rsa {
+impl From<RsaPublicKey> for RsaKey {
     fn from(sk: RsaPublicKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Rsa> for RsaPublicKey {
+impl TryFrom<&RsaKey> for RsaPublicKey {
     type Error = Error;
 
-    fn try_from(value: &Rsa) -> Result<Self, Self::Error> {
+    fn try_from(value: &RsaKey) -> Result<Self, Self::Error> {
         let n = BoxedUint::from_be_slice_vartime(&value.n);
         let e = BoxedUint::from_be_slice_vartime(&value.e);
         RsaPublicKey::new(n, e).map_err(|_| Error::Invalid)
     }
 }
 
-impl TryFrom<Rsa> for RsaPublicKey {
+impl TryFrom<RsaKey> for RsaPublicKey {
     type Error = Error;
 
-    fn try_from(value: Rsa) -> Result<Self, Self::Error> {
+    fn try_from(value: RsaKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }
 
-impl From<&RsaPrivateKey> for Rsa {
+impl From<&RsaPrivateKey> for RsaKey {
     fn from(pk: &RsaPrivateKey) -> Self {
         let opt = Some(RsaOptional {
             p: pk.primes()[0].to_be_bytes().into(),
@@ -121,16 +121,16 @@ impl From<&RsaPrivateKey> for Rsa {
     }
 }
 
-impl From<RsaPrivateKey> for Rsa {
+impl From<RsaPrivateKey> for RsaKey {
     fn from(sk: RsaPrivateKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Rsa> for RsaPrivateKey {
+impl TryFrom<&RsaKey> for RsaPrivateKey {
     type Error = Error;
 
-    fn try_from(value: &Rsa) -> Result<Self, Self::Error> {
+    fn try_from(value: &RsaKey) -> Result<Self, Self::Error> {
         if let Some(prv) = value.prv.as_ref() {
             if let Some(opt) = prv.opt.as_ref() {
                 let bits = u32::try_from(value.n.len()).map_err(|_| Error::Invalid)? * 8;
@@ -155,10 +155,10 @@ impl TryFrom<&Rsa> for RsaPrivateKey {
     }
 }
 
-impl TryFrom<Rsa> for RsaPrivateKey {
+impl TryFrom<RsaKey> for RsaPrivateKey {
     type Error = Error;
 
-    fn try_from(value: Rsa) -> Result<Self, Self::Error> {
+    fn try_from(value: RsaKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }

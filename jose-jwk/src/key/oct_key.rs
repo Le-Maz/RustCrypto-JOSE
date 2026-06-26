@@ -9,7 +9,7 @@ use jose_b64::serde::Secret;
 
 /// A symmetric octet key.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Oct {
+pub struct OctKey {
     /// The symmetric key.
     pub k: Secret,
 }

@@ -1,47 +1,47 @@
 // SPDX-FileCopyrightText: 2022 Profian Inc. <opensource@profian.com>
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![cfg(feature = "p521")]
+#![cfg(feature = "k256")]
 
-use p521::elliptic_curve::sec1::{FromSec1Point, ToSec1Point};
-use p521::{FieldBytes, PublicKey, Sec1Point, SecretKey};
+use k256::elliptic_curve::sec1::{FromSec1Point, ToSec1Point};
+use k256::{FieldBytes, PublicKey, Sec1Point, SecretKey};
 
 use jose_jwa::{Algorithm, Algorithm::Signing, Signing::*};
 
 use crate::crypto::{Error, KeyInfo};
-use crate::{Ec, EcCurves};
+use crate::{EcCurves, EcKey};
 
 #[cfg(feature = "legacy")]
-impl crate::legacy::JwkParameters for p521::NistP521 {
-    const CRV: &'static str = "P-521";
+impl crate::legacy::JwkParameters for k256::Secp256k1 {
+    const CRV: &'static str = "secp256k1";
 }
 
 impl KeyInfo for PublicKey {
     fn strength(&self) -> usize {
-        32
+        16
     }
 
     fn is_supported(&self, algo: &Algorithm) -> bool {
-        matches!(algo, Signing(Es512))
+        matches!(algo, Signing(Es256K))
     }
 }
 
 impl KeyInfo for SecretKey {
     fn strength(&self) -> usize {
-        32
+        16
     }
 
     fn is_supported(&self, algo: &Algorithm) -> bool {
-        matches!(algo, Signing(Es512))
+        matches!(algo, Signing(Es256K))
     }
 }
 
-impl From<&PublicKey> for Ec {
+impl From<&PublicKey> for EcKey {
     fn from(pk: &PublicKey) -> Self {
         let ep = pk.to_sec1_point(false);
 
         Self {
-            crv: EcCurves::P521,
+            crv: EcCurves::P256K,
             x: ep.x().expect("unreachable").to_vec().into(),
             y: ep.y().expect("unreachable").to_vec().into(),
             d: None,
@@ -49,17 +49,17 @@ impl From<&PublicKey> for Ec {
     }
 }
 
-impl From<PublicKey> for Ec {
+impl From<PublicKey> for EcKey {
     fn from(sk: PublicKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Ec> for PublicKey {
+impl TryFrom<&EcKey> for PublicKey {
     type Error = Error;
 
-    fn try_from(value: &Ec) -> Result<Self, Self::Error> {
-        if value.crv != EcCurves::P521 {
+    fn try_from(value: &EcKey) -> Result<Self, Self::Error> {
+        if value.crv != EcCurves::P256K {
             return Err(Error::AlgMismatch);
         }
 
@@ -81,15 +81,15 @@ impl TryFrom<&Ec> for PublicKey {
     }
 }
 
-impl TryFrom<Ec> for PublicKey {
+impl TryFrom<EcKey> for PublicKey {
     type Error = Error;
 
-    fn try_from(value: Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: EcKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }
 
-impl From<&SecretKey> for Ec {
+impl From<&SecretKey> for EcKey {
     fn from(sk: &SecretKey) -> Self {
         let mut key: Self = sk.public_key().into();
         key.d = Some(sk.to_bytes().to_vec().into());
@@ -97,17 +97,17 @@ impl From<&SecretKey> for Ec {
     }
 }
 
-impl From<SecretKey> for Ec {
+impl From<SecretKey> for EcKey {
     fn from(sk: SecretKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Ec> for SecretKey {
+impl TryFrom<&EcKey> for SecretKey {
     type Error = Error;
 
-    fn try_from(value: &Ec) -> Result<Self, Self::Error> {
-        if value.crv != EcCurves::P521 {
+    fn try_from(value: &EcKey) -> Result<Self, Self::Error> {
+        if value.crv != EcCurves::P256K {
             return Err(Error::AlgMismatch);
         }
 
@@ -119,10 +119,10 @@ impl TryFrom<&Ec> for SecretKey {
     }
 }
 
-impl TryFrom<Ec> for SecretKey {
+impl TryFrom<EcKey> for SecretKey {
     type Error = Error;
 
-    fn try_from(value: Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: EcKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }

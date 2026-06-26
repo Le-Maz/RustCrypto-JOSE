@@ -32,7 +32,7 @@ mod rfc7517 {
         let jwk = JwkSet {
             keys: vec![
                 Jwk {
-                    key: Key::Ec(Ec {
+                    key: Key::Ec(EcKey {
                         crv: EcCurves::P256,
                         d: None,
                         x: vec![
@@ -54,7 +54,7 @@ mod rfc7517 {
                     },
                 },
                 Jwk {
-                    key: Key::Rsa(Rsa {
+                    key: Key::Rsa(RsaKey {
                         prv: None,
                         e: vec![1, 0, 1].into(),
                         n: vec![
@@ -141,7 +141,7 @@ mod rfc7517 {
         let jwk = JwkSet {
             keys: vec![
                 Jwk {
-                    key: Key::Ec(Ec {
+                    key: Key::Ec(EcKey {
                         crv: EcCurves::P256,
                         d: Some(
                             vec![
@@ -170,7 +170,7 @@ mod rfc7517 {
                     },
                 },
                 Jwk {
-                    key: Key::Rsa(Rsa {
+                    key: Key::Rsa(RsaKey {
                         e: vec![1, 0, 1].into(),
                         n: vec![
                             210, 252, 123, 106, 10, 30, 108, 103, 16, 74, 235, 143, 136, 178, 87,
@@ -329,7 +329,7 @@ mod rfc7517 {
         });
 
         let jwk = Jwk {
-            key: Key::Rsa(Rsa {
+            key: Key::Rsa(RsaKey {
                 prv: None,
                 e: vec![1, 0, 1].into(),
                 n: vec![
@@ -435,7 +435,7 @@ mod rfc8037 {
         });
 
         let jwk = Jwk {
-            key: Key::Okp(Okp {
+            key: Key::Okp(OkpKey {
                 crv: OkpCurves::Ed25519,
                 d: Some(
                     vec![
@@ -467,7 +467,7 @@ mod rfc8037 {
         });
 
         let jwk = Jwk {
-            key: Key::Okp(Okp {
+            key: Key::Okp(OkpKey {
                 crv: OkpCurves::Ed25519,
                 d: None,
                 x: vec![
@@ -494,7 +494,7 @@ mod rfc8037 {
         });
 
         let jwk = Jwk {
-            key: Key::Okp(Okp {
+            key: Key::Okp(OkpKey {
                 crv: OkpCurves::X25519,
                 d: None,
                 x: vec![
@@ -524,7 +524,7 @@ mod rfc8037 {
         });
 
         let jwk = Jwk {
-            key: Key::Okp(Okp {
+            key: Key::Okp(OkpKey {
                 crv: OkpCurves::X448,
                 d: None,
                 x: vec![

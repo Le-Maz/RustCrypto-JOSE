@@ -9,7 +9,7 @@ use p256::{FieldBytes, PublicKey, Sec1Point, SecretKey};
 use jose_jwa::{Algorithm, Algorithm::Signing, Signing::*};
 
 use crate::crypto::{Error, KeyInfo};
-use crate::{Ec, EcCurves};
+use crate::{EcCurves, EcKey};
 
 #[cfg(feature = "legacy")]
 impl crate::legacy::JwkParameters for p256::NistP256 {
@@ -36,7 +36,7 @@ impl KeyInfo for SecretKey {
     }
 }
 
-impl From<&PublicKey> for Ec {
+impl From<&PublicKey> for EcKey {
     fn from(pk: &PublicKey) -> Self {
         let ep = pk.to_sec1_point(false);
 
@@ -49,16 +49,16 @@ impl From<&PublicKey> for Ec {
     }
 }
 
-impl From<PublicKey> for Ec {
+impl From<PublicKey> for EcKey {
     fn from(sk: PublicKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Ec> for PublicKey {
+impl TryFrom<&EcKey> for PublicKey {
     type Error = Error;
 
-    fn try_from(value: &Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: &EcKey) -> Result<Self, Self::Error> {
         if value.crv != EcCurves::P256 {
             return Err(Error::AlgMismatch);
         }
@@ -81,15 +81,15 @@ impl TryFrom<&Ec> for PublicKey {
     }
 }
 
-impl TryFrom<Ec> for PublicKey {
+impl TryFrom<EcKey> for PublicKey {
     type Error = Error;
 
-    fn try_from(value: Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: EcKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }
 
-impl From<&SecretKey> for Ec {
+impl From<&SecretKey> for EcKey {
     fn from(sk: &SecretKey) -> Self {
         let mut key: Self = sk.public_key().into();
         key.d = Some(sk.to_bytes().to_vec().into());
@@ -97,16 +97,16 @@ impl From<&SecretKey> for Ec {
     }
 }
 
-impl From<SecretKey> for Ec {
+impl From<SecretKey> for EcKey {
     fn from(sk: SecretKey) -> Self {
         (&sk).into()
     }
 }
 
-impl TryFrom<&Ec> for SecretKey {
+impl TryFrom<&EcKey> for SecretKey {
     type Error = Error;
 
-    fn try_from(value: &Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: &EcKey) -> Result<Self, Self::Error> {
         if value.crv != EcCurves::P256 {
             return Err(Error::AlgMismatch);
         }
@@ -119,10 +119,10 @@ impl TryFrom<&Ec> for SecretKey {
     }
 }
 
-impl TryFrom<Ec> for SecretKey {
+impl TryFrom<EcKey> for SecretKey {
     type Error = Error;
 
-    fn try_from(value: Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: EcKey) -> Result<Self, Self::Error> {
         (&value).try_into()
     }
 }

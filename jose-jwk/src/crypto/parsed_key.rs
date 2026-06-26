@@ -178,26 +178,26 @@ impl From<p521::SecretKey> for ParsedKey {
     }
 }
 
-impl From<&crate::Oct> for ParsedKey {
-    fn from(value: &crate::Oct) -> Self {
+impl From<&crate::OctKey> for ParsedKey {
+    fn from(value: &crate::OctKey) -> Self {
         Self::Oct(value.k.to_vec().into_boxed_slice().into())
     }
 }
 
 #[cfg(feature = "rsa")]
-impl TryFrom<&crate::Rsa> for ParsedKey {
+impl TryFrom<&crate::RsaKey> for ParsedKey {
     type Error = super::Error;
 
-    fn try_from(value: &crate::Rsa) -> Result<Self, Self::Error> {
+    fn try_from(value: &crate::RsaKey) -> Result<Self, Self::Error> {
         Ok(Self::Rsa(value.try_into()?))
     }
 }
 
 #[cfg(any(feature = "p256", feature = "p384", feature = "p521"))]
-impl TryFrom<&crate::Ec> for ParsedKey {
+impl TryFrom<&crate::EcKey> for ParsedKey {
     type Error = super::Error;
 
-    fn try_from(value: &crate::Ec) -> Result<Self, Self::Error> {
+    fn try_from(value: &crate::EcKey) -> Result<Self, Self::Error> {
         match value.crv {
             #[cfg(feature = "p256")]
             crate::EcCurves::P256 => Ok(Self::P256(value.try_into()?)),
@@ -234,7 +234,7 @@ impl TryFrom<&crate::Key> for ParsedKey {
 impl From<&ParsedKey> for crate::Key {
     fn from(value: &ParsedKey) -> Self {
         match value {
-            ParsedKey::Oct(oct) => Self::Oct(crate::Oct {
+            ParsedKey::Oct(oct) => Self::Oct(crate::OctKey {
                 k: oct.to_vec().into(),
             }),
 

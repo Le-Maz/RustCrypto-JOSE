@@ -14,7 +14,7 @@ use jose_b64::serde::{Bytes, Secret};
 
 /// An elliptic-curve key.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Ec {
+pub struct EcKey {
     /// The elliptic curve identifier.
     pub crv: EcCurves,
 
